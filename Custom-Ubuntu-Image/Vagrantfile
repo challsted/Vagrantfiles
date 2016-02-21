@@ -1,0 +1,61 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # Configur VM
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.hostname = "ubuntu-1404"
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "2048"]
+    vb.name = "Customized Ubuntu"
+  end
+  config.vm.post_up_message = "enter \"vagrant ssh\" once updates are complete"
+
+  # Configure Network
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 443, host: 9443
+
+  # Install extra base config (This will be converted to a Chef Cookbook later)
+  config.vm.provision :shell, inline: "apt-get update"
+  config.vm.provision :shell, inline: "apt-get -y upgrade"
+  config.vm.provision :shell, inline: "apt-get -y install git"
+  config.vm.provision :shell, inline: "apt-get -y install curl"
+  config.vm.provision :shell, inline: "apt-get -y install wget"
+  config.vm.provision :shell, privileged: false, inline: "mkdir -p ~/git"
+  config.vm.provision :shell, privileged: false, inline: "git clone https://github.com/challsted/dotfiles.git ~/git/dotfiles"
+
+  # Configure Dotfiles
+  # ZSH
+  config.vm.provision :shell, inline: "apt-get -y install zsh"
+  config.vm.provision :shell, privileged: false, inline: "git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh"
+  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/git/dotfiles/zsh/zshrc.symlink ~/.zshrc"
+  config.vm.provision :shell, inline: "chsh -s /usr/bin/zsh vagrant"
+  # Vim
+  config.vm.provision :shell, inline: "apt-get -y install vim"
+  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/git/dotfiles/vim/vimrc.symlink ~/.vimrc"
+  config.vm.provision :shell, privileged: false, inline: "mkdir -p ~/.vim/colors/"
+  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/.vim/plugged/molokai/colors/molokai.vim ~/.vim/colors/molokai.vim"
+  config.vm.provision :shell, privileged: false, inline: "curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+  config.vm.provision :shell, privileged: false, inline: "/usr/bin/vim +PlugInstall +qall"
+  # NVim
+  config.vm.provision :shell, inline: "add-apt-repository ppa:neovim-ppa/unstable -y"
+  config.vm.provision :shell, inline: "apt-get update"
+  config.vm.provision :shell, inline: "apt-get -y install neovim"
+  config.vm.provision :shell, privileged: false, inline: "mkdir -p ~/.config/nvim"
+  config.vm.provision :shell, privileged: false, inline: "cd ~/.config/nvim && mkdir -p colors undo swap spell backup && cd -"
+  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/git/dotfiles/nvim/nvimrc.symlink ~/.config/nvim/init.vim"
+  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/.config/nvim/plugged/molokai/colors/molokai.vim ~/.config/nvim/colors/molokai.vim"
+  config.vm.provision :shell, privileged: false, inline: "curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+  config.vm.provision :shell, privileged: false, inline: "/usr/bin/nvim +PlugInstall +qall"
+  config.vm.provision :shell, inline: "update-alternatives --install /usr/bin/vi vi /usr/bin/nvim 60"
+  config.vm.provision :shell, inline: "update-alternatives --config vi"
+  config.vm.provision :shell, inline: "update-alternatives --install /usr/bin/editor editor /usr/bin/nvim 60"
+  config.vm.provision :shell, inline: "update-alternatives --config editor"
+  # TMux
+  config.vm.provision :shell, inline: "apt-get -y install tmux"
+  config.vm.provision :shell, privileged: false, inline: "git clone git://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm"
+  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/git/dotfiles/tmux/tmux.conf.symlink ~/.tmux.conf"
+
+end
