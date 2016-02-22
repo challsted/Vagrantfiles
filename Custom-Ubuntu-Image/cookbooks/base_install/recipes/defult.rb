@@ -19,9 +19,6 @@ end
 package wget do
     action :upgrade
 end
-package vim do
-    action :upgrade
-end
 package zsh do
     action :upgrade
 end
@@ -42,17 +39,8 @@ user "#{user}" do
     action :create
 end
 
-%w{git .vim .config .config/nvim .tmux .tmux/plugins}.each do | dir |
+%w{git .config .config/nvim .tmux .tmux/plugins}.each do | dir |
   directory "/home/#{user}/#{dir}" do
-    mode '0755'
-    owner "#{user}"
-    group "#{user}"
-    action :create
-  end
-end
-
-%w{colors autoload plugged undo swap spell backup}.each do | dir |
-  directory "/home/#{user}/.vim/#{dir}" do
     mode '0755'
     owner "#{user}"
     group "#{user}"
@@ -87,16 +75,6 @@ git 'TMux Plugin Manager' do
     action :sync
 end
 
-execute 'Vim Plug - Vim' do
-    command 'curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-    creates '~/.vim/autoload/plug.vim'
-    action :run
-end
-
-execute 'Install Vim Plugins' do
-    command '$(which vim) +PlugInstall +qall'
-end
-
 execute 'Vim Plug - NVim' do
     command 'curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
     creates '~/.config/nvim/autoload/plug.vim'
@@ -114,13 +92,6 @@ link "/home/#{user}/git/dotfiles/zsh/zshrc.symlink" do
   action :create
 end
 
-link "/home/#{user}/git/dotfiles/vim/vimrc.symlink" do
-  to "/home/#{user}/.vimrc"
-  owner "#{user}"
-  group "#{user}"
-  action :create
-end
-
 link "/home/#{user}/git/dotfiles/nvim/nvimrc.symlink" do
   to "/home/#{user}/.config/nvim/nvim.init"
   owner "#{user}"
@@ -130,14 +101,6 @@ end
 
 link "/home/#{user}/git/dotfiles/zsh/tmux.conf.symlink" do
   to "/home/#{user}/.tmux.conf"
-  owner "#{user}"
-  group "#{user}"
-  action :create
-end
-
-# Fix a bug with Molokai which defaults to a white theme
-link "/home/#{user}/.vim/plugged/molokai/colors/molokai.vim"
-  to "/home/#{user}/.vim/colors/molokai.vim"
   owner "#{user}"
   group "#{user}"
   action :create
