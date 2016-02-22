@@ -14,7 +14,7 @@ end
 
 link "/home/#{user}/git/dotfiles/zsh/zshrc.symlink" do
   to "/home/#{user}/.zshrc"
-  owner "#{user}"
-  group "#{user}"
+  owner #{user}
+  group #{user}
   action :create
 end

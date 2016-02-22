@@ -8,7 +8,7 @@ end
 
 directory "/home/#{user}/git" do
   mode '0755'
-  owner "#{user}"
-  group "#{user}"
+  owner #{user}
+  group #{user}
   action :create
 end

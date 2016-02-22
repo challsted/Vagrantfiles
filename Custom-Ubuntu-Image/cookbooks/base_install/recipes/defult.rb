@@ -20,7 +20,7 @@ package zsh do
     action :upgrade
 end
 
-user "#{user}" do
+user #{user} do
     comment "Managed by Chef"
     home "/home/#{user}"
     shell '/usr/bin/zsh'
